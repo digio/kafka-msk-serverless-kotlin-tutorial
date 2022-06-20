@@ -1,0 +1,15 @@
+aws:
+  region: us-east-2
+
+schema:
+  name: msk-serverless-simple-schema
+  registry:
+    name: msk-serverless-simple-registry
+
+bootstrap:
+  url: boot-xxxxxxx.kafka-serverless.aws-region.amazonaws.com:9098
+message:
+  topic:
+    name: msk-serverless-simple-topic
+  group:
+    id: msk-serverless-simple-group
