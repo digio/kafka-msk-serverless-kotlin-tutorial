@@ -14,12 +14,12 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
-import org.springframework.kafka.core.ConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaProducerFactory
 import org.springframework.kafka.core.KafkaTemplate
-import org.springframework.kafka.core.ProducerFactory
 import software.amazon.awssdk.services.glue.model.Compatibility
+import software.amazon.msk.auth.iam.IAMClientCallbackHandler
+import software.amazon.msk.auth.iam.IAMLoginModule
 
 @Configuration
 class KafkaConfig {
@@ -39,72 +39,66 @@ class KafkaConfig {
     private val schemaRegistryName: String? = null
 
     @Bean
-    fun kafkaTemplate(): KafkaTemplate<String, String> {
-        return KafkaTemplate(producerFactory())
-    }
-
-    @Bean
-    fun connectionProperties(): MutableMap<String, Any?> {
+    fun mskServerlessConnectionProperties(): MutableMap<String, Any?> {
         val properties: MutableMap<String, Any?> = HashMap()
 
         // Bootstrap server endpoint for the cluster
         properties[AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapUrl
 
-        // AWS Security settings
+        // AWS Security settings for MSK serverless connection
         properties[AdminClientConfig.SECURITY_PROTOCOL_CONFIG] = "SASL_SSL"
-        properties[SaslConfigs.SASL_MECHANISM] = "AWS_MSK_IAM"
-        properties[SaslConfigs.SASL_JAAS_CONFIG] = "software.amazon.msk.auth.iam.IAMLoginModule required"
-        properties[SaslConfigs.SASL_CLIENT_CALLBACK_HANDLER_CLASS] = "software.amazon.msk.auth.iam.IAMClientCallbackHandler"
+
+        properties[SaslConfigs.SASL_MECHANISM] = IAMLoginModule.MECHANISM
+        properties[SaslConfigs.SASL_JAAS_CONFIG] = "${IAMLoginModule::class.java.name} required"
+        properties[SaslConfigs.SASL_CLIENT_CALLBACK_HANDLER_CLASS] = IAMClientCallbackHandler::class.java.name
 
         return properties
     }
 
     @Bean
-    fun consumerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, String> {
-        val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
-        factory.consumerFactory = consumerFactory()
-        return factory
-    }
-
-    private fun consumerFactory(): ConsumerFactory<String, String> {
-        val properties: MutableMap<String, Any?> = HashMap(connectionProperties())
-
-        properties[ConsumerConfig.GROUP_ID_CONFIG] = groupId
-        properties[ConsumerConfig.MAX_PARTITION_FETCH_BYTES_CONFIG] = "20971520"
-        properties[ConsumerConfig.FETCH_MAX_BYTES_CONFIG] = "20971520"
-        properties[ConsumerConfig.RETRY_BACKOFF_MS_CONFIG] = "1000"
-
-        // Schema Registry Settings
-        properties[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java.name
-        properties[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = GlueSchemaRegistryKafkaDeserializer::class.java.name
-        properties[AWSSchemaRegistryConstants.AWS_REGION] = "us-east-2" // Pass an AWS Region
-        properties[AWSSchemaRegistryConstants.AVRO_RECORD_TYPE] = AvroRecordType.GENERIC_RECORD.getName() // Only required for AVRO data format
-
-        return DefaultKafkaConsumerFactory(properties)
-    }
-
-    private fun producerFactory(): ProducerFactory<String, String> {
-        val properties: MutableMap<String, Any?> = HashMap(connectionProperties())
+    fun kafkaTemplate(): KafkaTemplate<String, String> {
+        val properties: MutableMap<String, Any?> = HashMap(mskServerlessConnectionProperties())
 
         properties[ProducerConfig.RETRIES_CONFIG] = 3
         properties[ProducerConfig.RETRY_BACKOFF_MS_CONFIG] = 1000
 
-        // Schema Registry Settings
+        // AWS Schema Registry Settings
         properties[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java.name
         properties[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = GlueSchemaRegistryKafkaSerializer::class.java.name
 
         properties[AWSSchemaRegistryConstants.AWS_REGION] = awsRegion
-        properties[AWSSchemaRegistryConstants.DATA_FORMAT] = "JSON" // OR "AVRO"
+        properties[AWSSchemaRegistryConstants.DATA_FORMAT] = "AVRO" // OR "AVRO"
 
-        properties[AWSSchemaRegistryConstants.SCHEMA_AUTO_REGISTRATION_SETTING] = "true" // If not passed, uses "false"
         properties[AWSSchemaRegistryConstants.SCHEMA_NAME] =
             schemaName// If not passed, uses transport name (topic name in case of Kafka, or stream name in case of Kinesis Data Streams)
         properties[AWSSchemaRegistryConstants.REGISTRY_NAME] = schemaRegistryName // If not passed, uses "default-registry"
+
+        properties[AWSSchemaRegistryConstants.SCHEMA_AUTO_REGISTRATION_SETTING] = "true" // If not passed, uses "false"
         properties[AWSSchemaRegistryConstants.CACHE_TIME_TO_LIVE_MILLIS] = "86400000" // If not passed, uses 86400000 (24 Hours)
         properties[AWSSchemaRegistryConstants.CACHE_SIZE] = "10" // default value is 200
-        properties[AWSSchemaRegistryConstants.COMPATIBILITY_SETTING] =
-            Compatibility.FULL // Pass a compatibility mode. If not passed, uses Compatibility.BACKWARD
+        Compatibility.FULL // Pass a compatibility mode. If not passed, uses Compatibility.BACKWARD
         properties[AWSSchemaRegistryConstants.COMPRESSION_TYPE] = AWSSchemaRegistryConstants.COMPRESSION.ZLIB // If not passed, records are sent uncompressed
-        return DefaultKafkaProducerFactory(properties)
+        val producerFactory = DefaultKafkaProducerFactory<String, String>(properties)
+
+        return KafkaTemplate(producerFactory)
+    }
+
+    @Bean
+    fun consumerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, String> {
+        val properties: MutableMap<String, Any?> = HashMap(mskServerlessConnectionProperties())
+
+        properties[ConsumerConfig.GROUP_ID_CONFIG] = groupId
+
+        // Schema Registry Settings
+        properties[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java.name
+        properties[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = GlueSchemaRegistryKafkaDeserializer::class.java.name
+        properties[AWSSchemaRegistryConstants.AWS_REGION] = awsRegion
+        properties[AWSSchemaRegistryConstants.AVRO_RECORD_TYPE] = AvroRecordType.GENERIC_RECORD.getName() // Only required for AVRO data format
+
+        val consumerFactory = DefaultKafkaConsumerFactory<String, String>(properties)
+        val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
+        factory.consumerFactory = consumerFactory
+
+        return factory
     }
 }
