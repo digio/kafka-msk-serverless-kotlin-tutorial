@@ -17,7 +17,6 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaProducerFactory
 import org.springframework.kafka.core.KafkaTemplate
-import software.amazon.awssdk.services.glue.model.Compatibility
 import software.amazon.msk.auth.iam.IAMClientCallbackHandler
 import software.amazon.msk.auth.iam.IAMLoginModule
 
@@ -76,7 +75,6 @@ class KafkaConfig {
         properties[AWSSchemaRegistryConstants.SCHEMA_AUTO_REGISTRATION_SETTING] = "true" // If not passed, uses "false"
         properties[AWSSchemaRegistryConstants.CACHE_TIME_TO_LIVE_MILLIS] = "86400000" // If not passed, uses 86400000 (24 Hours)
         properties[AWSSchemaRegistryConstants.CACHE_SIZE] = "10" // default value is 200
-        Compatibility.FULL // Pass a compatibility mode. If not passed, uses Compatibility.BACKWARD
         properties[AWSSchemaRegistryConstants.COMPRESSION_TYPE] = AWSSchemaRegistryConstants.COMPRESSION.ZLIB // If not passed, records are sent uncompressed
         val producerFactory = DefaultKafkaProducerFactory<String, String>(properties)
 
