@@ -3,7 +3,6 @@ package org.kafka.tutorial.producers
 import mu.KotlinLogging
 import org.apache.avro.Schema
 import org.apache.avro.generic.GenericData
-import org.kafka.tutorial.KafkaMskServerlessApplication
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.core.KafkaTemplate
@@ -21,7 +20,7 @@ class SimpleMessageProducer
     @Value(value = "\${message.topic.name}")
     private val topicName: String? = null
     fun sendMessage(message: String) {
-        val bookClubSchema = Schema.Parser().parse(File(KafkaMskServerlessApplication::class.java.getResource("/BookClub.avsc").toURI()))
+        val bookClubSchema = Schema.Parser().parse(File(SimpleMessageProducer::class.java.getResource("/BookClub.avsc").toURI()))
         val bookClub = GenericData.Record(bookClubSchema)
         bookClub.put("Name", "test");
         bookClub.put("Author", "test");
