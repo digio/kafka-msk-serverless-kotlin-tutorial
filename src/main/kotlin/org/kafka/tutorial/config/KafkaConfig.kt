@@ -48,7 +48,7 @@ class KafkaConfig {
         properties[AdminClientConfig.SECURITY_PROTOCOL_CONFIG] = "SASL_SSL"
 
         properties[SaslConfigs.SASL_MECHANISM] = IAMLoginModule.MECHANISM
-        properties[SaslConfigs.SASL_JAAS_CONFIG] = "${IAMLoginModule::class.java.name} required"
+        properties[SaslConfigs.SASL_JAAS_CONFIG] = "${IAMLoginModule::class.java.name} required;"
         properties[SaslConfigs.SASL_CLIENT_CALLBACK_HANDLER_CLASS] = IAMClientCallbackHandler::class.java.name
 
         return properties
