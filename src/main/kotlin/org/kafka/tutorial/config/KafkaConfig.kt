@@ -4,6 +4,7 @@ import com.amazonaws.services.schemaregistry.deserializers.GlueSchemaRegistryKaf
 import com.amazonaws.services.schemaregistry.serializers.GlueSchemaRegistryKafkaSerializer
 import com.amazonaws.services.schemaregistry.utils.AWSSchemaRegistryConstants
 import com.amazonaws.services.schemaregistry.utils.AvroRecordType
+import org.apache.avro.generic.GenericData
 import org.apache.kafka.clients.admin.AdminClientConfig
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig
@@ -17,6 +18,7 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaProducerFactory
 import org.springframework.kafka.core.KafkaTemplate
+import software.amazon.awssdk.services.glue.model.DataFormat
 import software.amazon.msk.auth.iam.IAMClientCallbackHandler
 import software.amazon.msk.auth.iam.IAMLoginModule
 
@@ -55,7 +57,7 @@ class KafkaConfig {
     }
 
     @Bean
-    fun kafkaTemplate(): KafkaTemplate<String, String> {
+    fun kafkaTemplate(): KafkaTemplate<String, GenericData.Record> {
         val properties: MutableMap<String, Any?> = HashMap(mskServerlessConnectionProperties())
 
         properties[ProducerConfig.RETRIES_CONFIG] = 3
@@ -66,7 +68,7 @@ class KafkaConfig {
         properties[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = GlueSchemaRegistryKafkaSerializer::class.java.name
 
         properties[AWSSchemaRegistryConstants.AWS_REGION] = awsRegion
-        properties[AWSSchemaRegistryConstants.DATA_FORMAT] = "AVRO" // OR "AVRO"
+        properties[AWSSchemaRegistryConstants.DATA_FORMAT] = DataFormat.AVRO.name
 
         properties[AWSSchemaRegistryConstants.SCHEMA_NAME] =
             schemaName// If not passed, uses transport name (topic name in case of Kafka, or stream name in case of Kinesis Data Streams)
@@ -75,7 +77,7 @@ class KafkaConfig {
         properties[AWSSchemaRegistryConstants.SCHEMA_AUTO_REGISTRATION_SETTING] = "true" // If not passed, uses "false"
         properties[AWSSchemaRegistryConstants.CACHE_TIME_TO_LIVE_MILLIS] = "86400000" // If not passed, uses 86400000 (24 Hours)
         properties[AWSSchemaRegistryConstants.CACHE_SIZE] = "10" // default value is 200
-        val producerFactory = DefaultKafkaProducerFactory<String, String>(properties)
+        val producerFactory = DefaultKafkaProducerFactory<String, GenericData.Record>(properties)
 
         return KafkaTemplate(producerFactory)
     }

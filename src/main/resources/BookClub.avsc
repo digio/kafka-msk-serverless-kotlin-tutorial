@@ -1,0 +1,23 @@
+{
+  "type": "record",
+  "namespace": "BookClub",
+  "name": "Book",
+  "fields": [
+    {
+      "name": "Name",
+      "type": "string"
+    },
+    {
+      "name": "Author",
+      "type": "string"
+    },
+    {
+      "name": "Genre",
+      "type": "string"
+    },
+    {
+      "name": "Rating",
+      "type": "int"
+    }
+  ]
+}
