@@ -23,8 +23,11 @@ OR update the properties in `resources/application.yml`
 
 ## To list the existing topics
 
-`GET https://<endpoint.url>/admin/topics`
+`GET https://<endpoint.url>/admin/topic/all`
 
 ## To create a new topic
 
-`GET https://<endpoint.url>/admin/topics`
+`POST https://<endpoint.url>/admin/topic`
+
+with topic name in the body 
+`msk-serverless-tutorial-topic`
