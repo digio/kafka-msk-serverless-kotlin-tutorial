@@ -35,6 +35,7 @@ class TopicsManager @Autowired constructor(private val mskServerlessConnectionPr
 
     fun listTopics(): Set<String> {
         val properties: MutableMap<String, Any?> = HashMap(mskServerlessConnectionProperties)
+        properties[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java.name
         properties[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java.name
 
         val consumer = KafkaConsumer<String, String>(properties)
