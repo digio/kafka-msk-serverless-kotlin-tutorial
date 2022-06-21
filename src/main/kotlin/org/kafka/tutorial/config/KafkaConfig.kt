@@ -75,7 +75,6 @@ class KafkaConfig {
         properties[AWSSchemaRegistryConstants.SCHEMA_AUTO_REGISTRATION_SETTING] = "true" // If not passed, uses "false"
         properties[AWSSchemaRegistryConstants.CACHE_TIME_TO_LIVE_MILLIS] = "86400000" // If not passed, uses 86400000 (24 Hours)
         properties[AWSSchemaRegistryConstants.CACHE_SIZE] = "10" // default value is 200
-        properties[AWSSchemaRegistryConstants.COMPRESSION_TYPE] = AWSSchemaRegistryConstants.COMPRESSION.ZLIB // If not passed, records are sent uncompressed
         val producerFactory = DefaultKafkaProducerFactory<String, String>(properties)
 
         return KafkaTemplate(producerFactory)

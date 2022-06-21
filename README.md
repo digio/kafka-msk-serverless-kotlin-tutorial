@@ -1,13 +1,30 @@
 # kafka-msk-serverless-kotlin-tutorial
-'Simple Kafka producer consumer Tutorial in kotlin connecting to msk serverless
+This is a simple Kafka Producer Consumer example which connects to AWS MSK Serverless cluster. 
 
-# ENV Variables
+# How to build
+`./gradlew clean build`
 
-BOOTSTRAP_URL
-AWS_REGION
+# Application Properties
+Either set the following environment variables
 
-MESSAGE_TOPIC_NAME
-MESSAGE_GROUP_ID
+* BOOTSTRAP_URL
+* AWS_REGION
+* MESSAGE_TOPIC_NAME
+* MESSAGE_GROUP_ID
+* SCHEMA_NAME
+* SCHEMA_REGISTRY_NAME
 
-SCHEMA_NAME
-SCHEMA_REGISTRY_NAME
+OR update the properties in `resources/application.yml`
+
+# To Run
+`java -jar build/libs/kafka-msk-serverless-kotlin-tutorial-0.0.1-SNAPSHOT.jar -Xms256m .`
+
+# REST Services
+
+## To list the existing topics
+
+`GET https://<endpoint.url>/admin/topics`
+
+## To create a new topic
+
+`GET https://<endpoint.url>/admin/topics`
