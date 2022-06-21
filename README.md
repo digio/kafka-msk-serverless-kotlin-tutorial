@@ -29,5 +29,14 @@ OR update the properties in `resources/application.yml`
 
 `POST https://<endpoint.url>/admin/topic`
 
-with topic name in the body 
-`msk-serverless-tutorial-topic`
+with topic name in the body
+`msk-serverless-tutorial-topic-simple`
+
+`msk-serverless-tutorial-topic-bookclub`
+
+## Once the topics are created, make sure to start the consumers
+
+`POST https://<endpoint.url>/admin/consumers/start`
+
+
+## To send a simple message 

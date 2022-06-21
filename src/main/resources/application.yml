@@ -8,8 +8,13 @@ schema:
 
 bootstrap:
   url: boot-xxxxxxx.kafka-serverless.aws-region.amazonaws.com:9098
-message:
-  topic:
-    name: msk-serverless-tutorial-topic
-  group:
-    id: msk-serverless-tutorial-group
+
+topic:
+    simple:
+      name:  msk-serverless-tutorial-topic-simple
+      group: msk-serverless-tutorial-group-simple
+    bookclub:
+      name: msk-serverless-tutorial-topic-bookclub
+      group: msk-serverless-tutorial-group-bookclub
+      registry: msk-serverless-tutorial-registry
+      schema: msk-serverless-tutorial-bookclub-schema

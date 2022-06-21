@@ -5,12 +5,11 @@ import com.amazonaws.services.schemaregistry.serializers.GlueSchemaRegistryKafka
 import com.amazonaws.services.schemaregistry.utils.AWSSchemaRegistryConstants
 import com.amazonaws.services.schemaregistry.utils.AvroRecordType
 import org.apache.avro.generic.GenericData
-import org.apache.kafka.clients.admin.AdminClientConfig
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig
-import org.apache.kafka.common.config.SaslConfigs
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -19,46 +18,25 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaProducerFactory
 import org.springframework.kafka.core.KafkaTemplate
 import software.amazon.awssdk.services.glue.model.DataFormat
-import software.amazon.msk.auth.iam.IAMClientCallbackHandler
-import software.amazon.msk.auth.iam.IAMLoginModule
 
 @Configuration
-class KafkaConfig {
-    @Value("\${bootstrap.url}")
-    private val bootstrapUrl: String? = null
+class GlueKafkaConfig {
 
     @Value("\${aws.region}")
     private val awsRegion: String? = null
 
-    @Value("\${message.group.id}")
+    @Value("\${topic.bookclub.group}")
     private val groupId: String? = null
 
-    @Value("\${schema.name}")
+    @Value("\${topic.bookclub.schema}")
     private val schemaName: String? = null
 
-    @Value("\${schema.registry.name}")
+    @Value("\${topic.bookclub.registry}")
     private val schemaRegistryName: String? = null
 
     @Bean
-    fun mskServerlessConnectionProperties(): MutableMap<String, Any?> {
-        val properties: MutableMap<String, Any?> = HashMap()
-
-        // Bootstrap server endpoint for the cluster
-        properties[AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapUrl
-
-        // AWS Security settings for MSK serverless connection
-        properties[AdminClientConfig.SECURITY_PROTOCOL_CONFIG] = "SASL_SSL"
-
-        properties[SaslConfigs.SASL_MECHANISM] = IAMLoginModule.MECHANISM
-        properties[SaslConfigs.SASL_JAAS_CONFIG] = "${IAMLoginModule::class.java.name} required;"
-        properties[SaslConfigs.SASL_CLIENT_CALLBACK_HANDLER_CLASS] = IAMClientCallbackHandler::class.java.name
-
-        return properties
-    }
-
-    @Bean
-    fun kafkaTemplate(): KafkaTemplate<String, GenericData.Record> {
-        val properties: MutableMap<String, Any?> = HashMap(mskServerlessConnectionProperties())
+    fun avroKafkaTemplate(@Autowired mskServerlessConnectionProperties: Map<String, Any?>): KafkaTemplate<String, GenericData.Record> {
+        val properties: MutableMap<String, Any?> = HashMap(mskServerlessConnectionProperties)
 
         properties[ProducerConfig.RETRIES_CONFIG] = 3
         properties[ProducerConfig.RETRY_BACKOFF_MS_CONFIG] = 1000
@@ -83,8 +61,8 @@ class KafkaConfig {
     }
 
     @Bean
-    fun consumerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, String> {
-        val properties: MutableMap<String, Any?> = HashMap(mskServerlessConnectionProperties())
+    fun avroConsumerContainerFactory(@Autowired mskServerlessConnectionProperties: Map<String, Any?>): ConcurrentKafkaListenerContainerFactory<String, GenericData.Record> {
+        val properties: MutableMap<String, Any?> = HashMap(mskServerlessConnectionProperties)
 
         properties[ConsumerConfig.GROUP_ID_CONFIG] = groupId
 
@@ -95,10 +73,8 @@ class KafkaConfig {
         properties[AWSSchemaRegistryConstants.AWS_REGION] = awsRegion
         properties[AWSSchemaRegistryConstants.AVRO_RECORD_TYPE] = AvroRecordType.GENERIC_RECORD.getName() // Only required for AVRO data format
 
-        val consumerFactory = DefaultKafkaConsumerFactory<String, String>(properties)
-        val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
-        factory.consumerFactory = consumerFactory
-
+        val factory = ConcurrentKafkaListenerContainerFactory<String, GenericData.Record>()
+        factory.consumerFactory = DefaultKafkaConsumerFactory(properties)
         return factory
     }
 }

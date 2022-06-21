@@ -1,8 +1,6 @@
 package org.kafka.tutorial.producers
 
 import mu.KotlinLogging
-import org.apache.avro.Schema
-import org.apache.avro.generic.GenericData
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.core.KafkaTemplate
@@ -14,47 +12,15 @@ private val log = KotlinLogging.logger {}
 
 @Component
 class SimpleMessageProducer
-@Autowired constructor(private val kafkaTemplate: KafkaTemplate<String, GenericData.Record>) {
+@Autowired constructor(private val simpleKafkaTemplate: KafkaTemplate<String, String>) {
 
-    val bookClubSchemaString = """
-        {
-          "type": "record",
-          "namespace": "BookClub",
-          "name": "Book",
-          "fields": [
-            {
-              "name": "Name",
-              "type": "string"
-            },
-            {
-              "name": "Author",
-              "type": "string"
-            },
-            {
-              "name": "Genre",
-              "type": "string"
-            },
-            {
-              "name": "Rating",
-              "type": "int"
-            }
-          ]
-        }
-    """.trimIndent();
-
-    @Value(value = "\${message.topic.name}")
+    @Value(value = "\${topic.simple.name}")
     private val topicName: String? = null
-    fun sendMessage(message: String) {
-        val bookClubSchema = Schema.Parser().parse(bookClubSchemaString)
-        val bookClub = GenericData.Record(bookClubSchema)
-        bookClub.put("Name", "test");
-        bookClub.put("Author", "test");
-        bookClub.put("Genre", "test");
-        bookClub.put("Rating", 1);
 
-        val future = kafkaTemplate.send(topicName!!, bookClub)
-        future.addCallback(object : ListenableFutureCallback<SendResult<String?, GenericData.Record?>?> {
-            override fun onSuccess(result: SendResult<String?, GenericData.Record?>?) {
+    fun produce(message: String) {
+        val future = simpleKafkaTemplate.send(topicName!!, message)
+        future.addCallback(object : ListenableFutureCallback<SendResult<String?, String?>?> {
+            override fun onSuccess(result: SendResult<String?, String?>?) {
                 log.info("Sent message=[$message] with offset=[${result!!.recordMetadata.offset()}]")
             }
 
