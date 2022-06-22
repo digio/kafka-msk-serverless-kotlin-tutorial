@@ -19,8 +19,8 @@ class SimpleKafkaConfig {
     private val groupId: String? = null
 
     @Bean
-    fun simpleKafkaTemplate(@Autowired mskServerlessConnectionProperties: Map<String, Any?>): KafkaTemplate<String, String> {
-        val properties: MutableMap<String, Any?> = HashMap(mskServerlessConnectionProperties)
+    fun simpleKafkaTemplate(@Autowired connectionProperties: Map<String, Any?>): KafkaTemplate<String, String> {
+        val properties: MutableMap<String, Any?> = HashMap(connectionProperties)
 
         properties[ProducerConfig.RETRIES_CONFIG] = 3
         properties[ProducerConfig.RETRY_BACKOFF_MS_CONFIG] = 1000
@@ -33,8 +33,8 @@ class SimpleKafkaConfig {
     }
 
     @Bean
-    fun simpleConsumerContainerFactory(@Autowired mskServerlessConnectionProperties: Map<String, Any?>): ConcurrentKafkaListenerContainerFactory<String, String> {
-        val properties: MutableMap<String, Any?> = HashMap(mskServerlessConnectionProperties)
+    fun simpleConsumerContainerFactory(@Autowired connectionProperties: Map<String, Any?>): ConcurrentKafkaListenerContainerFactory<String, String> {
+        val properties: MutableMap<String, Any?> = HashMap(connectionProperties)
 
         properties[ConsumerConfig.GROUP_ID_CONFIG] = groupId
 

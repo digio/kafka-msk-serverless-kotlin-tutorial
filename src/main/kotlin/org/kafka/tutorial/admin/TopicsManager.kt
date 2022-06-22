@@ -16,10 +16,10 @@ import java.util.function.Consumer
 private val log = KotlinLogging.logger {}
 
 @Component
-class TopicsManager @Autowired constructor(private val mskServerlessConnectionProperties: Map<String, Any?>) {
+class TopicsManager @Autowired constructor(private val connectionProperties: Map<String, Any?>) {
     fun createTopic(topicName: String?) {
         val topic = NewTopic(topicName, Optional.of(1), Optional.empty())
-        val topics = AdminClient.create(mskServerlessConnectionProperties).createTopics(java.util.List.of(topic))
+        val topics = AdminClient.create(connectionProperties).createTopics(java.util.List.of(topic))
         val values = topics.values()
         log.info("Number of topics created ${values.size}")
         log.info(values.toString())
@@ -34,7 +34,7 @@ class TopicsManager @Autowired constructor(private val mskServerlessConnectionPr
     }
 
     fun listTopics(): Set<String> {
-        val properties: MutableMap<String, Any?> = HashMap(mskServerlessConnectionProperties)
+        val properties: MutableMap<String, Any?> = HashMap(connectionProperties)
         properties[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java.name
         properties[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java.name
 

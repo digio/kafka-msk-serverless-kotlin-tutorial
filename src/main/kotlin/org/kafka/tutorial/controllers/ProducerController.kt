@@ -11,7 +11,10 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/message")
-class ProducerController @Autowired constructor(private val simpleMessageProducer: SimpleMessageProducer, private val bookClubAvroProducer: BookClubAvroProducer) {
+class ProducerController @Autowired constructor(
+    private val simpleMessageProducer: SimpleMessageProducer,
+    private val bookClubAvroProducer: BookClubAvroProducer
+) {
 
     @PostMapping("/simple")
     fun publish(@RequestBody message: String) {

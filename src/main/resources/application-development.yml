@@ -1,0 +1,4 @@
+aws:
+  region: us-east-1
+bootstrap:
+  url: localhost:29092

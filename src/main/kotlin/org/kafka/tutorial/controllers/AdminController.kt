@@ -12,7 +12,8 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/admin")
 class AdminController @Autowired constructor(
-    private val topicsManager: TopicsManager, private val kafkaListenerEndpointRegistry: KafkaListenerEndpointRegistry
+    private val topicsManager: TopicsManager,
+    private val kafkaListenerEndpointRegistry: KafkaListenerEndpointRegistry
 ) {
 
     @PostMapping("/topic")

@@ -20,7 +20,7 @@ import org.springframework.kafka.core.KafkaTemplate
 import software.amazon.awssdk.services.glue.model.DataFormat
 
 @Configuration
-class GlueKafkaConfig {
+class GlueRegistryConfig {
 
     @Value("\${aws.region}")
     private val awsRegion: String? = null
@@ -35,8 +35,8 @@ class GlueKafkaConfig {
     private val schemaRegistryName: String? = null
 
     @Bean
-    fun avroKafkaTemplate(@Autowired mskServerlessConnectionProperties: Map<String, Any?>): KafkaTemplate<String, GenericData.Record> {
-        val properties: MutableMap<String, Any?> = HashMap(mskServerlessConnectionProperties)
+    fun avroKafkaTemplate(@Autowired connectionProperties: Map<String, Any?>): KafkaTemplate<String, GenericData.Record> {
+        val properties: MutableMap<String, Any?> = HashMap(connectionProperties)
 
         properties[ProducerConfig.RETRIES_CONFIG] = 3
         properties[ProducerConfig.RETRY_BACKOFF_MS_CONFIG] = 1000
