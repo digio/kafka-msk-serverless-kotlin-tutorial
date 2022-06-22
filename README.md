@@ -45,7 +45,8 @@ OR update the properties in `resources/application.yml`
 # To Run
 `java -jar build/libs/kafka-msk-serverless-kotlin-tutorial-0.0.1-SNAPSHOT.jar -Xms256m .`
 
-# REST Services (for local server the endpoint.url would be http://localhost:8080)
+# REST Services 
+(for local server the endpoint.url would be http://localhost:8080)
 ## To list the existing topics
 `GET https://<endpoint.url>/admin/topic/all`
 
