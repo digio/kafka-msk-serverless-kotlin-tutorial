@@ -1,7 +1,7 @@
 package org.kafka.tutorial.consumers
 
 import mu.KotlinLogging
-import org.apache.avro.generic.GenericData
+import org.kafka.tutorial.domain.BookClub
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Component
 
@@ -17,7 +17,7 @@ class BookClubAvroMessageConsumer {
         autoStartup = "false",
         containerFactory = "avroConsumerContainerFactory",
     )
-    fun listen(bookClub: GenericData.Record) {
+    fun listen(bookClub: BookClub) {
         log.info("Received a book club message: $bookClub")
     }
 }

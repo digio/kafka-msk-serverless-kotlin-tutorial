@@ -1,4 +1,9 @@
 aws:
   region: us-east-1
 bootstrap:
-  url: localhost:29092
+  url: localhost:9092
+
+schema:
+  registry:
+    name: confluent
+    url: http://localhost:8081

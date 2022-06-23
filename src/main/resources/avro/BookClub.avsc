@@ -1,22 +1,22 @@
 {
   "type": "record",
-  "namespace": "BookClub",
-  "name": "Book",
+  "namespace": "org.kafka.tutorial.domain",
+  "name": "BookClub",
   "fields": [
     {
-      "name": "Name",
+      "name": "name",
       "type": "string"
     },
     {
-      "name": "Author",
+      "name": "author",
       "type": "string"
     },
     {
-      "name": "Genre",
+      "name": "genre",
       "type": "string"
     },
     {
-      "name": "Rating",
+      "name": "rating",
       "type": "int"
     }
   ]

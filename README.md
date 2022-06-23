@@ -8,13 +8,16 @@ This is a simple Kafka Producer Consumer example which connects to AWS MSK Serve
 
 AWS MSK Serverless is not open to public. Unless we set up a bastion host, we can't really connect to the cluster from our local machine. 
 
-So for local development, we use single node kafka broker using docker.
+So for local development, we use single node confluent kafka broker using docker.
 
 To run the kafka server locally
 `docker-compose up -d`
 
 To stop the kafka server locally
 `docker-compose down`
+
+For accessing confluent local center
+`http://localhost:9021/`
 
 If you are using glue schema registry, then make sure setting the aws creds.
 
@@ -46,7 +49,7 @@ OR update the properties in `resources/application.yml`
 `java -jar build/libs/kafka-msk-serverless-kotlin-tutorial-0.0.1-SNAPSHOT.jar -Xms256m .`
 
 # REST Services 
-(for local server the endpoint.url would be http://localhost:8080)
+(for local server the endpoint.url would be http://localhost:9092)
 ## To list the existing topics
 `GET https://<endpoint.url>/admin/topic/all`
 
@@ -74,12 +77,12 @@ This will produce a bookclub record serialised with avro schema TOPIC_BOOKCLUB_S
 Endpoint:
 `POST https://<endpoint.url>/message/bookclub`
 With body 
-`
+```
 {
     "name": "Runaway",
     "author": "Alice Munro",
     "genre": "Short Stories",
     "rating": "4"
 }
-`
+```
 

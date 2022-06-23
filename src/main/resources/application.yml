@@ -2,9 +2,8 @@ aws:
   region: us-east-2
 
 schema:
-  name: msk-serverless-tutorial-schema
   registry:
-    name: msk-serverless-tutorial-registry
+    name: glue
 
 bootstrap:
   url: boot-xxxxxxx.kafka-serverless.aws-region.amazonaws.com:9098
